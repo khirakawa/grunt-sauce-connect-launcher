@@ -1,0 +1,46 @@
+{
+  "name": "grunt-sauce-connect-launcher",
+  "description": "Grunt plug-in to download and launch an instance of Sauce Labs Sauce Connect",
+  "version": "0.1.0",
+  "homepage": "https://github.com/seckardt/grunt-sauce-connect-launcher",
+  "author": "Steffen Eckardt <mosh666@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/seckardt/grunt-sauce-connect-launcher.git"
+  },
+  "bugs": {
+    "url": "https://github.com/seckardt/grunt-sauce-connect-launcher/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/seckardt/grunt-sauce-connect-launcher/blob/master/LICENSE-MIT"
+    }
+  ],
+  "engines": {
+    "node": ">=0.10.x"
+  },
+  "dependencies": {
+    "sauce-connect-launcher": "~0.3.2",
+    "request": "~2.34.0",
+    "q": "~1.0.1",
+    "lodash": "~2.4.1"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "~0.9.2",
+    "grunt": "~0.4.4"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.4"
+  },
+  "keywords": [
+    "gruntplugin",
+    "selenium",
+    "testing",
+    "sauce labs",
+    "saucelabs",
+    "sauce connect",
+    "sauceconnect",
+    "local tunnel"
+  ]
+}
