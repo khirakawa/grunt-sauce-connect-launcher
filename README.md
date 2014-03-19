@@ -118,6 +118,7 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+* v0.1.1 - No code changes. Unpublished v0.1.0 as `node publish` leaked a local `user.json` with credentials.
 * v0.1.0 - Initial commit.
 
 ## License
