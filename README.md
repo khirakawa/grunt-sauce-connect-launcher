@@ -102,7 +102,7 @@ Default value: `console.log`
 
 ### Overview
 
-This task can be used to ensure that the currently opened Sauce Connect tunnel is being closed and that the remove Sauce Connect machine is being shut down.
+This task can be used to ensure that the currently opened Sauce Connect tunnel gets closed and that the related Sauce Connect machine is shut down.
 
 ### Usage Examples
 
