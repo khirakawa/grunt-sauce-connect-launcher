@@ -36,6 +36,7 @@ module.exports = function (grunt) {
 				accessKey: '12345678-1234-1234-1234-1234567890ab'
 			}),
 
+			unit: {},
 			e2e: {}
 		}
 	});
@@ -43,6 +44,7 @@ module.exports = function (grunt) {
 
 	grunt.registerTask('test', [
 		'default',
+		'sauce_connect:unit',
 		'sauce_connect:e2e',
 		'sauce-connect-close'
 	]);

@@ -83,7 +83,7 @@ Default value: `false`
 #### options.logger
 
 Type: `Function`
-Default value: `console.log`
+Default value: `grunt.verbose.writeln`
 
 ### Usage Examples
 
@@ -118,6 +118,7 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+* v0.2.0 - Ensure closing existing Sauce Connect tunnel (and related machine) before opening a new tunnel.
 * v0.1.1 - No code changes. Unpublished v0.1.0 as `npm publish` leaked a local `user.json` with credentials.
 * v0.1.0 - Initial commit.
 

@@ -13,42 +13,12 @@
 
 module.exports = function (grunt) {
 	var launcher = require('sauce-connect-launcher'),
-		_ = require('lodash'),
-		q = require('q'),
-		request = require('request').defaults({jar: false, json: true}),
 		tunnel = {};
 
-	grunt.registerMultiTask('sauce_connect', 'Grunt plug-in to download and launch Sauce Labs Sauce Connect', function () {
-		var options = tunnel.options = this.options({
-				tunnelIdentifier: 'Tunnel' + new Date().getTime(),
-				verbose: grunt.option('verbose') === true,
-				logger: grunt.verbose.writeln
-			}),
-			done = this.async();
-
-		var tunnelId = options.tunnelIdentifier,
-			userName = options.username;
-		grunt.log.writeln('Open'.cyan + ' Sauce Connect tunnel: ' + tunnelId.cyan);
-
-		// Create base URL for Sauce Labs REST API calls
-		tunnel.baseUrl = ['https://', userName, ':', options.accessKey, '@saucelabs.com', '/rest/v1/', userName].join('');
-
-		launcher(options, function (err, process) {
-			if (err) {
-				launcher.kill(function () {
-					err = err.error || (err.message || String(err));
-					grunt.fatal('Failed to open Sauce Connect tunnel: ' + err);
-				});
-			}
-
-			grunt.log.writeln('Opened'.green + ' Sauce Connect tunnel: ' + tunnelId.cyan);
-			tunnel.process = process;
-			done();
-		});
-	});
-
-	grunt.registerTask('sauce-connect-close', 'Closes the current Sauce Connect tunnel', function () {
-		var done = this.async();
+	function close(callback) {
+		var request = require('request').defaults({jar: false, json: true}),
+			_ = require('lodash'),
+			q = require('q');
 
 		function obtainMachines() {
 			var deferred = q.defer();
@@ -72,7 +42,7 @@ module.exports = function (grunt) {
 					responses++;
 					if (err) {
 						deferred.reject(err);
-					} else if (body && body.tunnel_identifier === tunnel.options.tunnelIdentifier) {
+					} else if (body && body.tunnel_identifier === tunnel.tid) {
 						resolved = true;
 						deferred.resolve(body);
 					} else if (responses === tunnelIds.length) {
@@ -87,7 +57,7 @@ module.exports = function (grunt) {
 
 		function killMachine(tunnelData) {
 			var deferred = q.defer(),
-				tunnelId = tunnelData.id || tunnelIdentifier;
+				tunnelId = tunnelData.id || tunnel.tid;
 
 			grunt.log.writeln('Stop'.cyan + ' Sauce Connect machine: ' + tunnelId.cyan);
 
@@ -103,25 +73,79 @@ module.exports = function (grunt) {
 			return deferred.promise;
 		}
 
+		function closeTunnel(proc) {
+			return function () {
+				var deferred = q.defer();
+				proc.close(function () {
+					grunt.log.writeln('Closed'.green + ' Sauce Connect tunnel: ' + tunnel.tid.cyan);
+					deferred.resolve();
+				});
+				return deferred.promise;
+			};
+		}
+
 		if (tunnel.process) {
-			var tunnelIdentifier = tunnel.options.tunnelIdentifier;
-			grunt.log.writeln('Close'.cyan + ' Sauce Connect tunnel: ' + tunnelIdentifier.cyan);
+			// Prevent double closing of the current tunnel process
+			var proc = tunnel.process;
+			delete tunnel.process;
+
+			grunt.log.writeln('Close'.cyan + ' Sauce Connect tunnel: ' + tunnel.tid.cyan);
 
 			obtainMachines()
 				.then(obtainMachine)
 				.then(killMachine)
+				.then(closeTunnel(proc))
 				.fin(function () {
-					tunnel.process.close(function () {
-						grunt.log.writeln('Closed'.green + ' Sauce Connect tunnel: ' + tunnelIdentifier.cyan);
-						done();
-					});
+					callback();
 				});
 		} else {
 			grunt.log.writeln('Close'.cyan + ' current Sauce Connect tunnel');
 			launcher.kill(function () {
 				grunt.log.writeln('Closed'.green + ' current Sauce Connect tunnel');
+				callback();
+			});
+		}
+	}
+
+	grunt.registerMultiTask('sauce_connect', 'Grunt plug-in to download and launch Sauce Labs Sauce Connect', function () {
+		var options = this.options({
+				tunnelIdentifier: 'Tunnel' + new Date().getTime(),
+				verbose: grunt.option('verbose') === true,
+				logger: grunt.verbose.writeln
+			}),
+			done = this.async();
+
+		function open() {
+			var tunnelId = tunnel.tid = options.tunnelIdentifier,
+				userName = options.username;
+			grunt.log.writeln('Open'.cyan + ' Sauce Connect tunnel: ' + tunnelId.cyan);
+
+			// Create base URL for Sauce Labs REST API calls
+			tunnel.baseUrl = ['https://', userName, ':', options.accessKey, '@saucelabs.com', '/rest/v1/', userName].join('');
+
+			launcher(options, function (err, process) {
+				if (err) {
+					launcher.kill(function () {
+						err = err.error || (err.message || String(err));
+						return grunt.warn('Failed to open Sauce Connect tunnel: ' + err);
+					});
+				}
+
+				grunt.log.writeln('Opened'.green + ' Sauce Connect tunnel: ' + tunnelId.cyan);
+				tunnel.process = process;
 				done();
 			});
 		}
+
+		if (tunnel.process) {
+			grunt.log.writeln('Existing'.cyan + ' Sauce Connect tunnel: ' + tunnel.tid.cyan);
+			close(open);
+		} else {
+			open();
+		}
+	});
+
+	grunt.registerTask('sauce-connect-close', 'Closes the current Sauce Connect tunnel', function () {
+		close(this.async());
 	});
 };
