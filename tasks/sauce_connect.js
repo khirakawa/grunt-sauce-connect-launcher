@@ -20,38 +20,23 @@ module.exports = function (grunt) {
 			_ = require('lodash'),
 			q = require('q');
 
-		function obtainMachines() {
+		function obtainMachine() {
 			var deferred = q.defer();
-			request.get(tunnel.baseUrl + '/tunnels', function (err, resp, body) {
+			request.get(tunnel.baseUrl + '/tunnels?full=1', function (err, resp, body) {
 				if (err) {
-					deferred.reject(err);
-				} else {
-					deferred.resolve(body);
+					return deferred.reject(err);
 				}
-			});
-			return deferred.promise;
-		}
 
-		function obtainMachine(tunnelIds) {
-			var deferred = q.defer(),
-				responses = 0,
-				resolved = false;
-
-			_.every(tunnelIds, function (tunnelId) {
-				request.get(tunnel.baseUrl + '/tunnels/' + tunnelId, function (err, resp, body) {
-					responses++;
-					if (err) {
-						deferred.reject(err);
-					} else if (body && body.tunnel_identifier === tunnel.tid) {
-						resolved = true;
-						deferred.resolve(body);
-					} else if (responses === tunnelIds.length) {
-						deferred.reject('Failed to obtain Sauce Connect tunnel');
+				_.every(body, function (tunnelData) {
+					if (tunnelData && tunnelData.tunnel_identifier === tunnel.tid) {
+						deferred.resolve(tunnelData);
+						return false;
 					}
+					return true;
 				});
-				return !resolved;
-			});
 
+				deferred.reject();
+			});
 			return deferred.promise;
 		}
 
@@ -91,8 +76,7 @@ module.exports = function (grunt) {
 
 			grunt.log.writeln('Close'.cyan + ' Sauce Connect tunnel: ' + tunnel.tid.cyan);
 
-			obtainMachines()
-				.then(obtainMachine)
+			obtainMachine()
 				.then(killMachine)
 				.then(closeTunnel(proc))
 				.fin(function () {
