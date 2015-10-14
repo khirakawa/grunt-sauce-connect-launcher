@@ -118,6 +118,7 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+* v0.3.1 - Update to `sauce-connect-launcher^0.13.0`.
 * v0.3.0 - Update to `sauce-connect-launcher~0.4.0`. Fixes issue #1. More details [here](https://github.com/bermi/sauce-connect-launcher/issues/22).
 * v0.2.1 - Simplified the way to obtain running Sauce Connect machines via `?full=1` parameter when requesting the tunnel list.
 * v0.2.0 - Ensure closing existing Sauce Connect tunnel (and related machine) before opening a new tunnel.

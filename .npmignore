@@ -1,3 +1,4 @@
 *.log
 *.json
+!package.json
 .idea

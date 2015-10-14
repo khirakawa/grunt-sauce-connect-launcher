@@ -3,7 +3,7 @@
  *
  * Grunt task utilizing [sauce-connect-launcher](https://github.com/bermi/sauce-connect-launcher) to download and launch Sauce Labs [Sauce Connect](https://saucelabs.com/docs/connect).
  *
- * Copyright (c) 2014 Steffen Eckardt
+ * Copyright (c) 2014-2015 Steffen Eckardt
  * Licensed under the MIT license.
  *
  * @see https://github.com/seckardt/grunt-sauce-connect-launcher
